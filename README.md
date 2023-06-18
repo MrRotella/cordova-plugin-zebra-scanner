@@ -10,7 +10,8 @@ It uses the Zebra SDK version 2.6.16.0.
 ## Limitations
 * iOS is not supported. It looks like I won't get more time allocated to develop iOS part.
   However this plugin can be used instead: https://github.com/shanghai-tang/cordova-plugin-zebra-scanner
-* Only one scanner can be connected. The Zebra SDK does not support multiple connections.
+* Only one Bluetooth scanner can be connected. The Zebra SDK does not support multiple Bluetooth connections.
+* Multiple USB scanners can be connected. 1 Bluetooth + multiple USB scanners are also supported.
 * The Zebra SDKHandler is automatically initialized when the plugin starts.
 
 
@@ -97,7 +98,7 @@ zebraScanner.stopScan(successCallback, errorCallback)
 
 
 ### getAvailableDevices
-Returns all bluetooth (possibly USB connected) devices found by Zebra SDK including paired devices.
+Returns all bluetooth and USB connected devices found by Zebra SDK including paired devices.
 Zebra SDK searches for devices non-stop and stores all devices it had found. This method returns all stored devices.
 
 ```javascript
@@ -124,7 +125,7 @@ None
 
 
 ### getActiveDevices
-Returns all connected devices. Zebra SDK supports only one connection so this method returns maximum one device.
+Returns all connected devices. If using a Bluetooth scanner, only one device will be returned. USB scanners can return multiple devices (combination of USB & Bluetooth is also possible).
 
 ```javascript
 zebraScanner.getActiveDevices(successCallback, errorCallback)
@@ -149,7 +150,8 @@ None
 
 
 ### getPairingBarcode
-Returns barcode for pairing devices. The barcode is JPG encoded in base64.
+Returns barcode for pairing devices. The barcode is JPG encoded in base64.   
+This isn't needed anymore with the latest Zebra SDK version.
 
 ```javascript
 zebraScanner.getPairingBarcode(successCallback, errorCallback)
@@ -165,7 +167,7 @@ None
 ### connect
 Connects to a device. The device needs to be found by Zebra SDK before it is possible to connect.
 Call getAvailableDevices() to check if the device was already found or use startScan() to search for it.
-It is possible to connect only to a single device. If a connection to a device is interrupted
+It is possible to connect only to a single Bluetooth device (multiple USB is possible, USB + Bluetooth is also possible). If a connection to a device is interrupted
  errorCallback will be called with a message "Disconnected".
 
 ```javascript
