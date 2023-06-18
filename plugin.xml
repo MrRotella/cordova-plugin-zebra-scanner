@@ -13,7 +13,7 @@
   <issue>https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner/issues</issue>
 
   <engines>
-    <engine name="cordova" version=">=5.0.0" />
+    <engine name="cordova" version=">=10.0.0" />
   </engines>
 
   <js-module src="www/zebrascanner.js" name="ZebraScanner">
