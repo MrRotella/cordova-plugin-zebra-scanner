@@ -1,10 +1,10 @@
 # Zebra Barcode Scanner Plugin [Android]
-This plugin allows you to communicate with Zebra scanners over bluetooth 2.0 (possibly USB as well) on Android.
+This plugin allows you to communicate with Zebra scanners over Bluetooth 2.0 and USB on Android.
 
 It uses the Zebra SDK version 2.6.16.0.
 
 ## Requirements
-* Cordova 5.0.0 or higher
+* Cordova 10.0.0 or higher
 * Android 11 or higher - target Android API 33
 
 ## Limitations
