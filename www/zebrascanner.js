@@ -36,6 +36,9 @@ const zebraScanner = {
   unsubscribe(successCallback, errorCallback) {
     cordova.exec(successCallback, errorCallback, serviceName, arguments.callee.name, []);
   },
+  getBatteryStats(successCallback, errorCallback, params) {
+    cordova.exec(successCallback, errorCallback, serviceName, arguments.callee.name, [params]);
+  },
 }
 
 // Init Zebra SDK when Cordova is ready

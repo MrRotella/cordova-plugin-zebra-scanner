@@ -3,6 +3,7 @@ package land.cookie.cordova.plugin.zebrascanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
 
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.Manifest;
 import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Xml;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
@@ -27,6 +29,10 @@ import com.zebra.scannercontrol.SDKHandler;
 import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.DCSScannerInfo;
 import com.zebra.scannercontrol.BarCodeView;
+
+import org.xmlpull.v1.XmlPullParser;
+
+import static com.zebra.scannercontrol.RMDAttributes.*;
 
 public class ZebraScanner extends CordovaPlugin {
     private static final String TAG = "CL_ZebraScanner";
@@ -84,6 +90,10 @@ public class ZebraScanner extends CordovaPlugin {
             unsubscribeAction(callbackContext);
         else if ("init".equals(action))
             initSdk();
+        // else if ("enableAutomaticSession".equals(action))
+        //     enableAutomaticSessionAction(args, callbackContext);
+        else if ("getBatteryStats".equals(action))
+            getBatteryStatsAction(args, callbackContext);
         else
             return false;
 
@@ -285,6 +295,128 @@ public class ZebraScanner extends CordovaPlugin {
 
         subscriptionCallback = null;
         callbackContext.success("ok");
+    }
+
+    private void getBatteryStatsAction(JSONArray params, CallbackContext callbackContext) {
+        JSONObject param = params.optJSONObject(0);
+        if (param == null) {
+            callbackContext.error("Missing parameters");
+            return;
+        }
+        int deviceId = param.optInt("deviceId");
+        if (deviceId == 0) {
+            callbackContext.error("Invalid parameter - deviceId");
+            return;
+        }
+        String in_xml = "<inArgs><scannerID>" + deviceId + " </scannerID><cmdArgs><arg-xml><attrib_list>";
+            in_xml+=RMD_ATTR_BAT_MANUFACTURE_DATE;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_SERIAL_NUMBER;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_MODEL_NUMBER;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_FIRMWARE_VERSION;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_DESIGN_CAPACITY;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_STATE_OF_HEALTH_METER;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_CHARGE_CYCLES_CONSUMED;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_FULL_CHARGE_CAP;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_STATE_OF_CHARGE;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_REMAINING_CAP;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_CHARGE_STATUS;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_REMAINING_TIME_TO_COMPLETE_CHARGING;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_VOLTAGE;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_CURRENT;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_TEMP_PRESENT;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_TEMP_HIGHEST;
+            in_xml+=",";
+            in_xml+=RMD_ATTR_BAT_TEMP_LOWEST;
+
+            in_xml += "</attrib_list></arg-xml></cmdArgs></inArgs>";
+
+        StringBuilder sb = new StringBuilder();
+        DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkExecuteCommandOpCodeInXMLForScanner(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GET, in_xml, sb);
+        JSONObject device = new JSONObject();
+        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
+            try {
+                Log.d(TAG, sb.toString());
+                int i = 0;
+                int attrId = -1;
+                XmlPullParser parser = Xml.newPullParser();
+
+                parser.setInput(new StringReader(sb.toString()));
+                int event = parser.getEventType();
+                String text = null;
+                while (event != XmlPullParser.END_DOCUMENT) {
+                    String name = parser.getName();
+                    switch (event) {
+                        case XmlPullParser.START_TAG:
+                            break;
+                        case XmlPullParser.TEXT:
+                            text = parser.getText();
+                            break;
+                        case XmlPullParser.END_TAG:
+                            // Log.d(TAG, "Name of the end tag: " + name);
+                            if (name.equals("id")) {
+                                if (text != null) {
+                                    attrId = Integer.parseInt(text.trim());
+                                }
+                                // Log.d(TAG, "ID tag found: ID: " + attrId);
+                            } else if (name.equals("value")) {
+                                if (text != null) {
+                                    final String attrVal = text.trim();
+                                    if (RMD_ATTR_BAT_MANUFACTURE_DATE == attrId) {
+                                        device.put("batteryManufactureDate", attrVal);
+                                    } else if (RMD_ATTR_BAT_SERIAL_NUMBER == attrId) {
+                                        device.put("batterySerialNumber", attrVal);
+                                    } else if (RMD_ATTR_BAT_MODEL_NUMBER == attrId) {
+                                        device.put("batteryModelNumber", attrVal);
+                                    } else if (RMD_ATTR_BAT_DESIGN_CAPACITY == attrId) {
+                                        device.put("batteryDesignCapacity", attrVal + " mAh");
+                                    } else if (RMD_ATTR_BAT_STATE_OF_HEALTH_METER == attrId) {
+                                        device.put("batteryStateOfHealthMeter", Double.parseDouble(attrVal) / 100);
+                                    } else if (RMD_ATTR_BAT_CHARGE_CYCLES_CONSUMED == attrId) {
+                                        device.put("batteryChargeCyclesConsumed", Integer.parseInt(attrVal));
+                                    } else if (RMD_ATTR_BAT_FULL_CHARGE_CAP == attrId) {
+                                        device.put("batteryFullChargeCapacity", attrVal + " mAh");
+                                    } else if (RMD_ATTR_BAT_STATE_OF_CHARGE == attrId) {
+                                        device.put("batteryStateOfCharge", Double.parseDouble(attrVal) / 100);
+                                    } else if (RMD_ATTR_BAT_REMAINING_CAP == attrId) {
+                                        device.put("batteryRemainingCapacity", attrVal + " mAh");
+                                    } else if (RMD_ATTR_BAT_TEMP_PRESENT == attrId) {
+                                        device.put("batteryTemperaturePresent", Integer.parseInt(attrVal));
+                                    } else if (RMD_ATTR_BAT_TEMP_HIGHEST == attrId) {
+                                        device.put("batteryTemperatureHighest", Integer.parseInt(attrVal));
+                                    } else if (RMD_ATTR_BAT_TEMP_LOWEST == attrId) {
+                                        device.put("batteryTemperatureLowest", Integer.parseInt(attrVal));
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                    event = parser.next();
+                }
+                PluginResult message = createStatusMessage("getBatteryStats", "device", device, true);
+                connectionCallBack.sendPluginResult(message);
+            } catch (Exception e) {
+                Log.d(TAG, e.toString());
+                callbackContext.error(e.toString());
+            }
+        } else {
+            Log.d(TAG, "Result battery stats not ok");
+            callbackContext.error("Battery stats: Unknown error");
+        }
     }
 
     public void notifyDeviceFound(DCSScannerInfo deviceInfo) throws JSONException {

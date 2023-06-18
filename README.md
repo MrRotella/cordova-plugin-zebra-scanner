@@ -47,6 +47,7 @@ In theory, all versions compatible with SDK version 2.6.16.0 should work. [See Z
 * [zebraScanner.stopScan](#stopscan)
 * [zebraScanner.getAvailableDevices](#getavailabledevices)
 * [zebraScanner.getActiveDevices](#getactivedevices)
+* [zebraScanner.getBatteryStats](#getbatterystats)
 * [zebraScanner.getPairingBarcode](#getpairingbarcode)
 * [zebraScanner.connect](#connect)
 * [zebraScanner.disconnect](#disconnect)
@@ -148,6 +149,46 @@ An array of devices
 ##### Errors
 None
 
+### getBatteryStats
+Returns the battery statistics for the requested device. This will only work with Bluetooth connected devices. Bluetooth devices paired to a USB connected Presentation Cradle won't return battery information.
+
+```javascript
+zebraScanner.getBatteryStats(successCallback, errorCallback, params)
+```
+##### Params
+```
+{
+  "deviceId": <number>
+}
+```
+* deviceId - ID of a device retrieved from methods startScan() or getAvailableDevices()
+
+#### Success
+```
+{
+  "status": "getBatteryStats"
+  "device": {
+    "batteryManufactureDate": <string (Example: 04JUL20)>
+    "batterySerialNumber": <string>
+    "batteryModelNumber": <string>
+    "batteryDesignCapacity": <string>
+    "batteryStateOfHealthMeter": <number (percentage)>
+    "batteryChargeCyclesConsumed": <number>
+    "batteryFullChargeCapacity": <string>
+    "batteryStateOfCharge": <number (percentage)>
+    "batteryRemainingCapacity": <string>
+    "batteryTemperaturePresent": <number (in °C)>
+    "batteryTemperatureHighest": <number (in °C)>
+    "batteryTemperatureLowest": <number (in °C)>
+  }
+}
+```
+
+##### Errors
+* "Missing parameters" -- Params were not provided
+* "Invalid parameter - deviceId" -- Parameter 'deviceId' was not a valid number
+* "Battery stats: Unknown error" -- Unknown error
+* Error string from SDK itself
 
 ### getPairingBarcode
 Returns barcode for pairing devices. The barcode is JPG encoded in base64.   
