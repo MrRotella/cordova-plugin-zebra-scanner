@@ -26,15 +26,17 @@
         <param name="android-package" value="land.cookie.cordova.plugin.zebrascanner.ZebraScanner" />
       </feature>
     </config-file>
-
-    <config-file target="AndroidManifest.xml" parent="/manifest" mode="merge">
-      <uses-permission android:name="android.permission.BLUETOOTH" />
-      <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+      <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+      <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+      <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+      <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     </config-file>
 
     <framework src="src/android/ZebraScanner.gradle" custom="true" type="gradleReference" />
-    <source-file src="src/android/libs/barcode_scanner_library_v2.3.2.0.aar" target-dir="libs/" />
-
+    <lib-file src="src/android/libs/barcode_scanner_library_v2.6.16.0-release.aar"/>
     <source-file src="src/android/ZebraScanner.java"
                  target-dir="src/land/cookie/cordova/plugin/zebrascanner" />
     <source-file src="src/android/NotificationReceiver.java"

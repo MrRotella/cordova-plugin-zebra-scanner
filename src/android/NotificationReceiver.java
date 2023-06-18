@@ -5,6 +5,7 @@ import android.util.Log;
 import com.zebra.scannercontrol.DCSScannerInfo;
 import com.zebra.scannercontrol.FirmwareUpdateEvent;
 import com.zebra.scannercontrol.IDcsSdkApiDelegate;
+import com.zebra.barcode.sdk.sms.ConfigurationUpdateEvent;
 
 import land.cookie.cordova.plugin.zebrascanner.barcode.BarcodeTypes;
 
@@ -87,5 +88,15 @@ public class NotificationReceiver implements IDcsSdkApiDelegate {
     @Override
     public void dcssdkEventAuxScannerAppeared(DCSScannerInfo dcsScannerInfo, DCSScannerInfo dcsScannerInfo1) {
         Log.d(TAG, "Aux Scanner Appeared");
+    }
+
+    @Override
+    public void dcssdkEventConfigurationUpdate(ConfigurationUpdateEvent configEvent) {
+        Log.d(TAG, "dcssdkEventConfigurationUpdate appeared");
+    }
+
+    @Override
+    public void dcssdkEventBinaryData(byte[] var1, int var2) {
+        Log.d(TAG, "Got dcssdkEventBinaryData");
     }
 }

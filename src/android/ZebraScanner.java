@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
 
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.Manifest;
+import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
 
 import org.json.JSONArray;
@@ -33,13 +37,32 @@ public class ZebraScanner extends CordovaPlugin {
     // SDK does not support multiple connected devices.
     private CallbackContext connectionCallBack;
     private CallbackContext subscriptionCallback;
+    private CallbackContext callbackContext; // Callback context for permissions
+
+    // Permissions found in example Scanner Control app (version 2.6.16.0)
+    private static final String[] ANDROID_13_PERMISSIONS = new String[]{
+        Manifest.permission.BLUETOOTH_SCAN,
+        Manifest.permission.BLUETOOTH_CONNECT,
+        Manifest.permission.BLUETOOTH_ADVERTISE,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    };
+
+    private static final String[] ANDROID_12_PERMISSIONS = new String[]{
+        Manifest.permission.BLUETOOTH_SCAN,
+        Manifest.permission.BLUETOOTH_CONNECT,
+        Manifest.permission.BLUETOOTH_ADVERTISE,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    };
+
+    private static final String[] ANDROID_PERMISSIONS = new String[]{
+        Manifest.permission.BLUETOOTH,
+        Manifest.permission.BLUETOOTH_ADMIN,
+    };
 
     @Override
     public boolean execute (
             String action, final JSONArray args, final CallbackContext callbackContext
     ) throws JSONException {
-        if (sdkHandler == null)
-            init();
 
         if ("startScan".equals(action))
             startScanAction(callbackContext);
@@ -59,14 +82,50 @@ public class ZebraScanner extends CordovaPlugin {
             subscribeAction(callbackContext);
         else if ("unsubscribe".equals(action))
             unsubscribeAction(callbackContext);
+        else if ("init".equals(action))
+            initSdk();
         else
             return false;
+
+        this.callbackContext = callbackContext; // Used for permissions
         return true;
     }
-
+    /**
+     * Init SDK & check/request permissions
+     */
+    private void initSdk() {
+        // Set permissions based on Android version
+        String[] permissions = {};
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions = ANDROID_13_PERMISSIONS;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions = ANDROID_12_PERMISSIONS;
+        } else {
+            permissions = ANDROID_PERMISSIONS;
+        }
+        if (hasPermission(permissions)) {
+            if (sdkHandler == null) {
+                this.cordova.getActivity().runOnUiThread(new Runnable() {
+                    // It must be called on the main thread
+                    public void run() {
+                        SDKHandler tempsdkHandler = new SDKHandler(cordova.getContext(), true);
+                        setSdk(tempsdkHandler);
+                    }
+                });
+            }
+        } else {
+            PermissionHelper.requestPermissions(this, 0, permissions);
+        }
+    }
+    /**
+     * Otherwise, sdkHandler was null
+     */
+    private void setSdk(SDKHandler sdk) {
+        sdkHandler = sdk;
+        init();
+    }
     private void init() {
         Log.d(TAG, "Setting up Zebra SDK.");
-        sdkHandler = new SDKHandler(this.cordova.getActivity().getApplicationContext());
         notificationReceiver = new NotificationReceiver(this);
 
         // Subscribe to barcode events
@@ -105,7 +164,6 @@ public class ZebraScanner extends CordovaPlugin {
         }
     }
 
-    // There is a bug in Zebra SDK so this method is pointless.
     private void stopScanAction(CallbackContext callbackContext) throws JSONException {
         if (scanCallBack == null) {
             callbackContext.error("Scanning was not in a progress.");
@@ -284,6 +342,36 @@ public class ZebraScanner extends CordovaPlugin {
         subscriptionCallback.sendPluginResult(message);
     }
 
+    public void onRequestPermissionResult(int requestCode, String[] permissions,
+                                          int[] grantResults) throws JSONException
+    {
+        PluginResult result;
+		if(callbackContext != null) {
+            for (int r : grantResults) {
+                if (r == PackageManager.PERMISSION_DENIED) {
+                    Log.d(TAG, "Permission Denied!");
+                    result = new PluginResult(PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION);
+					callbackContext.sendPluginResult(result);
+                    return;
+                }
+            }
+            result = new PluginResult(PluginResult.Status.OK);
+            // Init SDK when permissions have been given
+            initSdk();
+			callbackContext.sendPluginResult(result);
+        }
+    }
+    public boolean hasPermission(String[] permissions) {
+        for(String p : permissions)
+        {
+            if(!PermissionHelper.hasPermission(this, p))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private PluginResult createStatusMessage(String status, boolean keepCallback) throws JSONException {
         return createStatusMessage(status, null, null, keepCallback);
     }
@@ -308,6 +396,7 @@ public class ZebraScanner extends CordovaPlugin {
         device.put("name", scanner.getScannerName());
         device.put("model", scanner.getScannerModel());
         device.put("serialNumber", scanner.getScannerHWSerialNumber());
+        device.put("connectionType", scanner.getConnectionType());
         return device;
     }
 

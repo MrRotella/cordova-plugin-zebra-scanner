@@ -1,3 +1,5 @@
+const channel = require('cordova/channel');
+
 const serviceName = 'ZebraScanner'
 
 const zebraScanner = {
@@ -36,4 +38,8 @@ const zebraScanner = {
   },
 }
 
+// Init Zebra SDK when Cordova is ready
+channel.onCordovaReady.subscribe(function () {
+  cordova.exec((f) => console.log('zebraScanner: init Zebra Scanner SDK', f), (g) => console.warn('zebraScanner: init: error ', g), 'ZebraScanner', 'init', []);
+});
 module.exports = zebraScanner

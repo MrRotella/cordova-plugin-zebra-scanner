@@ -1,45 +1,45 @@
 # Zebra Barcode Scanner Plugin [Android]
 This plugin allows you to communicate with Zebra scanners over bluetooth 2.0 (possibly USB as well) on Android.
 
+It uses the Zebra SDK version 2.6.16.0.
+
 ## Requirements
 * Cordova 5.0.0 or higher
-* Android 4.1 or higher - target Android API 26
+* Android 11 or higher - target Android API 33
 
 ## Limitations
 * iOS is not supported. It looks like I won't get more time allocated to develop iOS part.
   However this plugin can be used instead: https://github.com/shanghai-tang/cordova-plugin-zebra-scanner
 * Only one scanner can be connected. The Zebra SDK does not support multiple connections.
+* The Zebra SDKHandler is automatically initialized when the plugin starts.
 
-## Warning
-I had to use SDK provided by Zebra and there are multiple bugs in it.
-* Calling any method will start scanning for bluetooth devices. There was no way around it.
-  The SDK object starts scanning by itself when it is created.
-* There is no way to stop scanning for bluetooth devices. Calling stopScan() will stop the scan however only for few
-  seconds, after that the scan will restart itself and it will keep repeating that unless a scanner is connected or
-  until the plugin is destroyed.
 
 ## Install
 `cordova plugin add https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner.git`
 
 ## Overview
-These bluetooth barcode scanners are supported:
+These bluetooth barcode scanners are supported (in `SSI BT Classic (Discoverable)` mode):
 ```
 • CS4070
 • LI4278
 • DS6878
-• RFD8500 (Tested)
+• RFD8500
 • DS3678
 • LI3678
+• DS8178 (tested)
 ```
-These USB barcode scanners should be supported as well, however I cannot test it:
+These USB barcode scanners should be supported as well. The Presentation Cradle should be in `Symbol Native API (SNAPI) with Imaging Interface` mode (see your barcode scanner manual).
 ```
 • PL3307
 • DS457
 • DS4308
-• LS2208
+• LS2208 (if it has the silver Symbol logo and manufactured after 31 December 2014, it should work)
 • DS6878 and Presentation Cradle
 • MP6210 (CSS + Scale) + EAS (Sensormatic)
+• DS8178 and Presentation Cradle (tested)
 ```
+
+In theory, all versions compatible with SDK version 2.6.16.0 should work. [See Zebra Docs](https://techdocs.zebra.com/dcs/scanners/sdk-android/about/).
 
 ## Methods
 * [zebraScanner.startScan](#startscan)
@@ -53,8 +53,8 @@ These USB barcode scanners should be supported as well, however I cannot test it
 * [zebraScanner.unsubscribe](#unsubscribe)
 
 ### startScan
-Starts scanning for bluetooth (possibly USB connected) devices. Scanning is expensive so call stopScan() as soon as
-possible [see [Warning](#warning) above]. The method returns all discovered and paired devices.
+Starts scanning for bluetooth and USB connected devices. Scanning is expensive so call stopScan() as soon as
+possible. The method returns all discovered and paired devices.
 
 ```javascript
 zebraScanner.startScan(successCallback, errorCallback)
@@ -83,7 +83,7 @@ zebraScanner.startScan(successCallback, errorCallback)
 
 
 ### stopScan
-Stops scanning for bluetooth devices [see [Warning](#warning) above].
+Stops scanning for bluetooth devices.
 
 ```javascript
 zebraScanner.stopScan(successCallback, errorCallback)
@@ -113,6 +113,7 @@ An array of devices
     "name": <string>
     "model": <string>
     "serialNumber": <string>
+    "connectionType": <string>
   },
   ...
 ]
@@ -138,6 +139,7 @@ An array of devices
     "name": <string>
     "model": <string>
     "serialNumber": <string>
+    "connectionType": <string>
   }
 ]
 ```
