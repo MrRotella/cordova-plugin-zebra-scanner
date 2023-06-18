@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-zebra-scanner",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Cordova plugin to interface with Zebra barcode scanners.",
   "cordova": {
     "id": "cordova-plugin-zebra-scanner",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner.git"
+    "url": "git+https://github.com/Karting06/cordova-plugin-zebra-scanner.git"
   },
   "keywords": [
     "barcode",
@@ -30,7 +30,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner/issues"
+    "url": "https://github.com/Karting06/cordova-plugin-zebra-scanner/issues"
   },
-  "homepage": "https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner#readme"
+  "homepage": "https://github.com/Karting06/cordova-plugin-zebra-scanner#readme"
 }

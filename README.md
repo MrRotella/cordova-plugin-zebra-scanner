@@ -16,7 +16,7 @@ It uses the Zebra SDK version 2.6.16.0.
 
 
 ## Install
-`cordova plugin add https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner.git`
+`cordova plugin add https://github.com/Karting06/cordova-plugin-zebra-scanner.git`
 
 ## Overview
 These bluetooth barcode scanners are supported (in `SSI BT Classic (Discoverable)` mode):

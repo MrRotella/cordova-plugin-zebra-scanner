@@ -3,14 +3,14 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-zebra-scanner"
-        version="2.0.0">
+        version="3.0.0">
   <name>Zebra Barcode Scanner Plugin</name>
   <description>Cordova plugin to interface with Zebra barcode scanners.</description>
   <author>Precious Biscuit</author>
   <license>MIT</license>
   <keywords>barcode, scanner, zebra</keywords>
-  <repo>https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner.git</repo>
-  <issue>https://github.com/PreciousBiscuit/cordova-plugin-zebra-scanner/issues</issue>
+  <repo>https://github.com/Karting06/cordova-plugin-zebra-scanner.git</repo>
+  <issue>https://github.com/Karting06/cordova-plugin-zebra-scanner/issues</issue>
 
   <engines>
     <engine name="cordova" version=">=10.0.0" />
