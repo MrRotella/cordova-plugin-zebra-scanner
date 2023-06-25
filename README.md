@@ -166,21 +166,18 @@ zebraScanner.getBatteryStats(successCallback, errorCallback, params)
 #### Success
 ```
 {
-  "status": "getBatteryStats"
-  "device": {
-    "batteryManufactureDate": <string (Example: 04JUL20)>
-    "batterySerialNumber": <string>
-    "batteryModelNumber": <string>
-    "batteryDesignCapacity": <string>
-    "batteryStateOfHealthMeter": <number (percentage)>
-    "batteryChargeCyclesConsumed": <number>
-    "batteryFullChargeCapacity": <string>
-    "batteryStateOfCharge": <number (percentage)>
-    "batteryRemainingCapacity": <string>
-    "batteryTemperaturePresent": <number (in °C)>
-    "batteryTemperatureHighest": <number (in °C)>
-    "batteryTemperatureLowest": <number (in °C)>
-  }
+  "batteryManufactureDate": <string (Example: 04JUL20)>
+  "batterySerialNumber": <string>
+  "batteryModelNumber": <string>
+  "batteryDesignCapacity": <string>
+  "batteryStateOfHealthMeter": <number (percentage)>
+  "batteryChargeCyclesConsumed": <number>
+  "batteryFullChargeCapacity": <string>
+  "batteryStateOfCharge": <number (percentage)>
+  "batteryRemainingCapacity": <string>
+  "batteryTemperaturePresent": <number (in °C)>
+  "batteryTemperatureHighest": <number (in °C)>
+  "batteryTemperatureLowest": <number (in °C)>
 }
 ```
 

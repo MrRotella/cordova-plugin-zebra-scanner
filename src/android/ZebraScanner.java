@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.Manifest;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
@@ -64,6 +65,8 @@ public class ZebraScanner extends CordovaPlugin {
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
     };
+
+    private static BatteryStatsAsyncTask cmdExecTask=null;
 
     @Override
     public boolean execute (
@@ -345,77 +348,100 @@ public class ZebraScanner extends CordovaPlugin {
 
             in_xml += "</attrib_list></arg-xml></cmdArgs></inArgs>";
 
-        StringBuilder sb = new StringBuilder();
-        DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkExecuteCommandOpCodeInXMLForScanner(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GET, in_xml, sb);
-        JSONObject device = new JSONObject();
-        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
-            try {
-                Log.d(TAG, sb.toString());
-                int i = 0;
-                int attrId = -1;
-                XmlPullParser parser = Xml.newPullParser();
+        new BatteryStatsAsyncTask(deviceId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GET, callbackContext).execute(new String[]{in_xml});
+    }
 
-                parser.setInput(new StringReader(sb.toString()));
-                int event = parser.getEventType();
-                String text = null;
-                while (event != XmlPullParser.END_DOCUMENT) {
-                    String name = parser.getName();
-                    switch (event) {
-                        case XmlPullParser.START_TAG:
-                            break;
-                        case XmlPullParser.TEXT:
-                            text = parser.getText();
-                            break;
-                        case XmlPullParser.END_TAG:
-                            // Log.d(TAG, "Name of the end tag: " + name);
-                            if (name.equals("id")) {
-                                if (text != null) {
-                                    attrId = Integer.parseInt(text.trim());
-                                }
-                                // Log.d(TAG, "ID tag found: ID: " + attrId);
-                            } else if (name.equals("value")) {
-                                if (text != null) {
-                                    final String attrVal = text.trim();
-                                    if (RMD_ATTR_BAT_MANUFACTURE_DATE == attrId) {
-                                        device.put("batteryManufactureDate", attrVal);
-                                    } else if (RMD_ATTR_BAT_SERIAL_NUMBER == attrId) {
-                                        device.put("batterySerialNumber", attrVal);
-                                    } else if (RMD_ATTR_BAT_MODEL_NUMBER == attrId) {
-                                        device.put("batteryModelNumber", attrVal);
-                                    } else if (RMD_ATTR_BAT_DESIGN_CAPACITY == attrId) {
-                                        device.put("batteryDesignCapacity", attrVal + " mAh");
-                                    } else if (RMD_ATTR_BAT_STATE_OF_HEALTH_METER == attrId) {
-                                        device.put("batteryStateOfHealthMeter", Double.parseDouble(attrVal) / 100);
-                                    } else if (RMD_ATTR_BAT_CHARGE_CYCLES_CONSUMED == attrId) {
-                                        device.put("batteryChargeCyclesConsumed", Integer.parseInt(attrVal));
-                                    } else if (RMD_ATTR_BAT_FULL_CHARGE_CAP == attrId) {
-                                        device.put("batteryFullChargeCapacity", attrVal + " mAh");
-                                    } else if (RMD_ATTR_BAT_STATE_OF_CHARGE == attrId) {
-                                        device.put("batteryStateOfCharge", Double.parseDouble(attrVal) / 100);
-                                    } else if (RMD_ATTR_BAT_REMAINING_CAP == attrId) {
-                                        device.put("batteryRemainingCapacity", attrVal + " mAh");
-                                    } else if (RMD_ATTR_BAT_TEMP_PRESENT == attrId) {
-                                        device.put("batteryTemperaturePresent", Integer.parseInt(attrVal));
-                                    } else if (RMD_ATTR_BAT_TEMP_HIGHEST == attrId) {
-                                        device.put("batteryTemperatureHighest", Integer.parseInt(attrVal));
-                                    } else if (RMD_ATTR_BAT_TEMP_LOWEST == attrId) {
-                                        device.put("batteryTemperatureLowest", Integer.parseInt(attrVal));
+    /**
+     * Avoid blocking UI thread by using an async task for requesting battery statistics
+     * 
+     * Based on Zebra ScannerControl app
+     */
+    private class BatteryStatsAsyncTask extends AsyncTask<String,Integer,Boolean> {
+        int scannerId;
+        DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode;
+        CallbackContext callbackContext;
+        public BatteryStatsAsyncTask(int scannerId,  DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode, CallbackContext callbackContext){
+            this.scannerId=scannerId;
+            this.opcode=opcode;
+            this.callbackContext=callbackContext;
+        }
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            StringBuilder sb = new StringBuilder();
+            DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkExecuteCommandOpCodeInXMLForScanner(opcode, strings[0], sb);
+            if (opcode == DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GET) {
+                if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
+                    try {
+                        Log.i(TAG, sb.toString());
+                        int i = 0;
+                        int attrId = -1;
+                        XmlPullParser parser = Xml.newPullParser();
+                        
+                        JSONObject device = new JSONObject();
+                        parser.setInput(new StringReader(sb.toString()));
+                        int event = parser.getEventType();
+                        String text = null;
+                        while (event != XmlPullParser.END_DOCUMENT) {
+                            String name = parser.getName();
+                            switch (event) {
+                                case XmlPullParser.START_TAG:
+                                    break;
+                                case XmlPullParser.TEXT:
+                                    text = parser.getText();
+                                    break;
+                                case XmlPullParser.END_TAG:
+                                    // Log.i(TAG, "Name of the end tag: " + name);
+                                    if (name.equals("id")) {
+                                        if (text != null) {
+                                            attrId = Integer.parseInt(text.trim());
+                                        }
+                                        // Log.i(TAG, "ID tag found: ID: " + attrId);
+                                    } else if (name.equals("value")) {
+                                        if (text != null) {
+                                            final String attrVal = text.trim();
+                                            Log.i(TAG, "ID tag : " + attrId + ", Value tag found: Value: " + attrVal);
+                                            if (RMD_ATTR_BAT_MANUFACTURE_DATE == attrId) {
+                                                device.put("batteryManufactureDate", attrVal);
+                                            } else if (RMD_ATTR_BAT_SERIAL_NUMBER == attrId) {
+                                                device.put("batterySerialNumber", attrVal);
+                                            } else if (RMD_ATTR_BAT_MODEL_NUMBER == attrId) {
+                                                device.put("batteryModelNumber", attrVal);
+                                            } else if (RMD_ATTR_BAT_DESIGN_CAPACITY == attrId) {
+                                                device.put("batteryDesignCapacity", attrVal + " mAh");
+                                            } else if (RMD_ATTR_BAT_STATE_OF_HEALTH_METER == attrId) {
+                                                device.put("batteryStateOfHealthMeter", Double.parseDouble(attrVal) / 100);
+                                            } else if (RMD_ATTR_BAT_CHARGE_CYCLES_CONSUMED == attrId) {
+                                                device.put("batteryChargeCyclesConsumed", Integer.parseInt(attrVal));
+                                            } else if (RMD_ATTR_BAT_FULL_CHARGE_CAP == attrId) {
+                                                device.put("batteryFullChargeCapacity", attrVal + " mAh");
+                                            } else if (RMD_ATTR_BAT_STATE_OF_CHARGE == attrId) {
+                                                device.put("batteryStateOfCharge", Double.parseDouble(attrVal) / 100);
+                                            } else if (RMD_ATTR_BAT_REMAINING_CAP == attrId) {
+                                                device.put("batteryRemainingCapacity", attrVal + " mAh");
+                                            } else if (RMD_ATTR_BAT_TEMP_PRESENT == attrId) {
+                                                device.put("batteryTemperaturePresent", Integer.parseInt(attrVal));
+                                            } else if (RMD_ATTR_BAT_TEMP_HIGHEST == attrId) {
+                                                device.put("batteryTemperatureHighest", Integer.parseInt(attrVal));
+                                            } else if (RMD_ATTR_BAT_TEMP_LOWEST == attrId) {
+                                                device.put("batteryTemperatureLowest", Integer.parseInt(attrVal));
+                                            }
+                                        }
                                     }
-                                }
+                                    break;
                             }
-                            break;
+                            event = parser.next();
+                        }
+                        PluginResult message = new PluginResult(PluginResult.Status.OK, device);
+                        this.callbackContext.sendPluginResult(message);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString());
+                        this.callbackContext.error(e.toString());
                     }
-                    event = parser.next();
+                    return true;
                 }
-                PluginResult message = createStatusMessage("getBatteryStats", "device", device, true);
-                connectionCallBack.sendPluginResult(message);
-            } catch (Exception e) {
-                Log.d(TAG, e.toString());
-                callbackContext.error(e.toString());
+                return false;
             }
-        } else {
-            Log.d(TAG, "Result battery stats not ok");
-            callbackContext.error("Battery stats: Unknown error");
+            return false;
         }
     }
 
