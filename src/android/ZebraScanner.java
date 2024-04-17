@@ -252,26 +252,53 @@ public class ZebraScanner extends CordovaPlugin {
         readerDevice = new ReaderDevice(deviceName, deviceAddress, rfidReader);
         rfidReader.setHostName(deviceName);
 
-        DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkEstablishCommunicationSession(deviceId);
-
-        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
-            connectionCallBack = callbackContext;
-
-            JSONObject device = new JSONObject();
-            device.put("id", deviceId);
-
-            PluginResult message = createStatusMessage("connected", "device", device, true);
-            connectionCallBack.sendPluginResult(message);
-        }
-        else {
-            if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_NOT_AVAILABLE)
-                callbackContext.error("Scanner is not available.");
-            else if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_ALREADY_ACTIVE)
-                callbackContext.error("Already connected to a scanner.");
-            else
+        try {
+                rfidReader.setTimeout(3000);
+                rfidReader.connect();
+                connectionCallBack = callbackContext;
+                JSONObject device = new JSONObject();
+                device.put("id", deviceId);
+                PluginResult message = createStatusMessage("connected", "device", device, true);
+                connectionCallBack.sendPluginResult(message);
+                // rfidReader.Events.setBatteryEvent(true);
+            } catch (InvalidUsageException e) {
                 callbackContext.error("Unable to connect to a scanner.");
-            Log.d(TAG, "Connection to scanner " + deviceId + " failed.");
-        }
+                // callbackContext.error("Please check, if device bluetooth is ON." + e.getInfo());
+                Log.d(TAG, "Connection to scanner " + deviceName + " failed. "+ e.getInfo());
+                
+                rfidReader = null;
+                readerDevice = null;
+                deviceName = null;
+            } catch (OperationFailureException e) {
+                callbackContext.error("Unable to connect to a scanner.");
+                // callbackContext.error("Please check, if device bluetooth is ON." + e.getResults().toString() + " : " + e.getStatusDescription()
+                                // + " : " + e.getVendorMessage());
+                Log.d(TAG, "Connection to scanner " + deviceName + " failed. "+ e.getResults().toString() + " : " + e.getStatusDescription()+ " : " + e.getVendorMessage());
+                rfidReader = null;
+                readerDevice = null;
+                deviceName = null;
+            }
+
+        // DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkEstablishCommunicationSession(deviceId);
+
+        // if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
+        //     connectionCallBack = callbackContext;
+
+        //     JSONObject device = new JSONObject();
+        //     device.put("id", deviceId);
+
+        //     PluginResult message = createStatusMessage("connected", "device", device, true);
+        //     connectionCallBack.sendPluginResult(message);
+        // }
+        // else {
+        //     if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_NOT_AVAILABLE)
+        //         callbackContext.error("Scanner is not available.");
+        //     else if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_ALREADY_ACTIVE)
+        //         callbackContext.error("Already connected to a scanner.");
+        //     else
+        //         callbackContext.error("Unable to connect to a scanner.");
+        //     Log.d(TAG, "Connection to scanner " + deviceId + " failed.");
+        // }
     }
 
     private void disconnectAction(JSONArray params, CallbackContext callbackContext) {
@@ -285,21 +312,35 @@ public class ZebraScanner extends CordovaPlugin {
             callbackContext.error("Invalid parameter - deviceId");
             return;
         }
-
-        DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkTerminateCommunicationSession(deviceId);
-
-        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
+         try {
+            if (rfidReader == null) {
+                callbackContext.error("DEVICE_IS_NOT_CONNECTED");
+                return;
+            }
+            rfidReader.disconnect();
+            rfidReader = null;
+            readerDevice = null;
+            deviceName = null;
             callbackContext.success("ok");
+        } catch (InvalidUsageException e) {
+            callbackContext.error("Unexpexted error occured. " + e.getMessage());
+        } catch (OperationFailureException e) {
+            callbackContext.error("Unexpexted error occured. " + e.getMessage());
         }
-        else {
-            if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_NOT_AVAILABLE)
-                callbackContext.error("Scanner is not available.");
-            else if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_NOT_ACTIVE)
-                callbackContext.error("Never connected to a scanner.");
-            else
-                callbackContext.error("Unable to disconnect from a scanner.");
-            Log.d(TAG, "Connection to scanner " + deviceId + " failed.");
-        }
+        // DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkTerminateCommunicationSession(deviceId);
+
+        // if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
+        //     callbackContext.success("ok");
+        // }
+        // else {
+        //     if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_NOT_AVAILABLE)
+        //         callbackContext.error("Scanner is not available.");
+        //     else if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SCANNER_NOT_ACTIVE)
+        //         callbackContext.error("Never connected to a scanner.");
+        //     else
+        //         callbackContext.error("Unable to disconnect from a scanner.");
+        //     Log.d(TAG, "Connection to scanner " + deviceId + " failed.");
+        // }
     }
 
     private void subscribeAction(CallbackContext callbackContext) {
