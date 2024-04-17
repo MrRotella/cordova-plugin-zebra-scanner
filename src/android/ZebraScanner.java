@@ -31,6 +31,8 @@ import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.DCSScannerInfo;
 import com.zebra.scannercontrol.BarCodeView;
 
+import com.zebra.rfid.api3.*;
+
 import org.xmlpull.v1.XmlPullParser;
 
 import static com.zebra.scannercontrol.RMDAttributes.*;
@@ -67,6 +69,9 @@ public class ZebraScanner extends CordovaPlugin {
     };
 
     private static BatteryStatsAsyncTask cmdExecTask=null;
+
+    private static ReaderDevice readerDevice;
+    private static RFIDReader rfidReader;
 
     @Override
     public boolean execute (
@@ -230,6 +235,22 @@ public class ZebraScanner extends CordovaPlugin {
             callbackContext.error("Invalid parameter - deviceId");
             return;
         }
+
+        String deviceName = param.optString("deviceName");
+        if (deviceName == "") {
+            callbackContext.error("Invalid parameter - deviceName");
+            return;
+        }
+        String deviceAddress = param.optString("deviceAddress");
+        if (deviceAddress == "") {
+            callbackContext.error("Invalid parameter - deviceAddress");
+            return;
+        }
+
+        readerDevice = new ReaderDevice(deviceName, deviceAddress);
+        rfidReader = new RFIDReader(deviceName, 0, 0, "ASCII", "BLUETOOTH");
+        readerDevice = new ReaderDevice(deviceName, deviceAddress, rfidReader);
+        rfidReader.setHostName(deviceName);
 
         DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkEstablishCommunicationSession(deviceId);
 
