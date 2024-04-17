@@ -268,7 +268,7 @@ public class ZebraScanner extends CordovaPlugin {
                 
                 rfidReader = null;
                 readerDevice = null;
-                deviceName = null;
+                // deviceName = null;
             } catch (OperationFailureException e) {
                 callbackContext.error("Unable to connect to a scanner.");
                 // callbackContext.error("Please check, if device bluetooth is ON." + e.getResults().toString() + " : " + e.getStatusDescription()
@@ -276,7 +276,7 @@ public class ZebraScanner extends CordovaPlugin {
                 Log.d(TAG, "Connection to scanner " + deviceName + " failed. "+ e.getResults().toString() + " : " + e.getStatusDescription()+ " : " + e.getVendorMessage());
                 rfidReader = null;
                 readerDevice = null;
-                deviceName = null;
+                // deviceName = null;
             }
 
         // DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkEstablishCommunicationSession(deviceId);
@@ -320,7 +320,7 @@ public class ZebraScanner extends CordovaPlugin {
             rfidReader.disconnect();
             rfidReader = null;
             readerDevice = null;
-            deviceName = null;
+            // deviceName = null;
             callbackContext.success("ok");
         } catch (InvalidUsageException e) {
             callbackContext.error("Unexpexted error occured. " + e.getMessage());
