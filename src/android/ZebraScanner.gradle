@@ -18,9 +18,9 @@ android {
 
   dependencies {
     // implementation fileTree(include: ['*.aar'], dir: 'libs')
-    implementation(name : 'barcode_scanner_library_v2.6.16.0-release',ext:'aar') {
-      exclude group: 'com.google.zxing'
-    }
+    // implementation(name : 'barcode_scanner_library_v2.6.16.0-release',ext:'aar') {
+    //   exclude group: 'com.google.zxing'
+    // }
     implementation(name : 'API3_LIB-release-2.0.2.116',ext:'aar')
     implementation "androidx.lifecycle:lifecycle-process:2.5.1"
   }

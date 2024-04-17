@@ -36,7 +36,7 @@
     </config-file>
 
     <framework src="src/android/ZebraScanner.gradle" custom="true" type="gradleReference" />
-    <lib-file src="src/android/libs/barcode_scanner_library_v2.6.16.0-release.aar"/>
+    <!-- <lib-file src="src/android/libs/barcode_scanner_library_v2.6.16.0-release.aar"/> -->
     <lib-file src="src/android/libs/API3_LIB-release-2.0.2.116.aar"/>
     <source-file src="src/android/ZebraScanner.java"
                  target-dir="src/land/cookie/cordova/plugin/zebrascanner" />
