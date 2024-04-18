@@ -124,7 +124,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
             for (int i = 0; i < data.length(); i++) {
                 // JSONObject availableData = data.getJSONObject(i);
                 // String availableID = (String) availableData.get(EPC);
-                String availableID = (String) data.getJSONObject(i);
+                String availableID = (String) data.optString(i);
 
                 if (epc.equalsIgnoreCase(availableID)) {
                     isNew = false;
