@@ -325,8 +325,7 @@ public class ZebraScanner extends CordovaPlugin {
             callbackContext.error("Invalid parameter - deviceId");
             return;
         }
-        // rimuovo l'id di connession
-        connectedDeviceId = 0;
+        
          try {
             if (rfidReader == null) {
                 callbackContext.error("DEVICE_IS_NOT_CONNECTED");
@@ -342,8 +341,13 @@ public class ZebraScanner extends CordovaPlugin {
         } catch (OperationFailureException e) {
             callbackContext.error("Unexpexted error occured. " + e.getMessage());
         }
-        // DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkTerminateCommunicationSession(deviceId);
-
+        
+        DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkTerminateCommunicationSession(connectedDeviceId);
+        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_FAILURE) {
+            callbackContext.error("Unable to disconnect to a scanner.");
+        }
+        // rimuovo l'id di connessione
+        connectedDeviceId = 0;
         // if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
         //     callbackContext.success("ok");
         // }
