@@ -350,6 +350,13 @@ public class ZebraScanner extends CordovaPlugin {
         }
 
         subscriptionCallback = callbackContext;
+        try {
+            rfidReader.Events.addEventsListener(notificationReceiver);
+        } catch (InvalidUsageException e) {
+            e.printStackTrace();
+        } catch (OperationFailureException e) {
+            e.printStackTrace();
+        }
     }
 
     private void unsubscribeAction(CallbackContext callbackContext) {
@@ -359,6 +366,14 @@ public class ZebraScanner extends CordovaPlugin {
         }
 
         subscriptionCallback = null;
+        try {
+            rfidReader.Events.removeEventsListener(notificationReceiver);
+            success = true;
+        } catch (InvalidUsageException e) {
+            success = false;
+        } catch (OperationFailureException e) {
+            success = false;
+        }
         callbackContext.success("ok");
     }
 
