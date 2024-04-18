@@ -619,7 +619,7 @@ public class ZebraScanner extends CordovaPlugin {
         subscriptionCallback.sendPluginResult(message);
     }
 
-    public void notifyBarcodeReceived(String[] barcodeData, String barcodeType, int fromScannerId) throws JSONException {
+    public void notifyBarcodeReceived(JSONArray barcodeData, String barcodeType, int fromScannerId) throws JSONException {
         if (subscriptionCallback == null)
             return;
 
