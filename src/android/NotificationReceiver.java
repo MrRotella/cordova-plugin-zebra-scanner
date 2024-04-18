@@ -7,11 +7,13 @@ import com.zebra.scannercontrol.FirmwareUpdateEvent;
 import com.zebra.scannercontrol.IDcsSdkApiDelegate;
 // import com.zebra.barcode.sdk.sms.ConfigurationUpdateEvent;
 
+import com.zebra.rfid.api3.*;
+
 import land.cookie.cordova.plugin.zebrascanner.barcode.BarcodeTypes;
 
 import org.json.JSONException;
 
-public class NotificationReceiver implements IDcsSdkApiDelegate {
+public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListener {
     private static final String TAG = "CL_ZebraScanner";
     private ZebraScanner mScanner;
 
