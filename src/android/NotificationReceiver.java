@@ -27,7 +27,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     }
 
     @Override
-    public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) throws JSONException {
+    public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) {
         Log.d(TAG, "NotificationReceiver eventStatusNotify!!!!");
         try {
             if (rfidStatusEvents != null) {
@@ -75,7 +75,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     }
 
     @Override
-    public void eventReadNotify(RfidReadEvents rfidReadEvents) throws JSONException {
+    public void eventReadNotify(RfidReadEvents rfidReadEvents) {
         Log.d(TAG, "NotificationReceiver eventReadNotify!!!!");
         String epc;
         if (readerDevice != null) {
@@ -138,10 +138,10 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
                 data.put(epc);
             }
 
-        } catch (JSONException ex) {
+        } /* catch (JSONException ex) {
             Log.e(TAG, "Error: " + ex.getMessage());
             // callbackContext.error("Error: " + ex.getMessage());
-        }
+        } */
     }
 
     private String hexToAscii(String hexStr) {
