@@ -76,8 +76,12 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
             for (TagData tag : myTags) {
                 epc = tag.getTagID();
                 Log.d(TAG, "eventReadNotify epc" + epc);
-                mScanner.notifyBarcodeReceived(epc, "rfid", 1);
             }
+            // try { 
+            //     mScanner.notifyBarcodeReceived(epc, "rfid", 1); 
+            // } catch(JSONException err) {
+            //     Log.e(TAG, "ERROR notifying barcode.");
+            // }
          } else {
             Log.e(TAG, "ERROR missing readerDevice.");
          }
