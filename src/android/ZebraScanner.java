@@ -360,17 +360,17 @@ public class ZebraScanner extends CordovaPlugin {
             notificationReceiver = new NotificationReceiver(this,readerDevice);
             try {
                 rfidReader.Events.addEventsListener(notificationReceiver);
-                Log.d(TAG, "subscribeAction addEventsListener OK")
+                Log.d(TAG, "subscribeAction addEventsListener OK");
             } catch (InvalidUsageException e) {
-                Log.e(TAG, "subscribeAction addEventsListener InvalidUsageException")
+                Log.e(TAG, "subscribeAction addEventsListener InvalidUsageException");
                 e.printStackTrace();
             } catch (OperationFailureException e) {
-                Log.e(TAG, "subscribeAction addEventsListener OperationFailureException")
+                Log.e(TAG, "subscribeAction addEventsListener OperationFailureException");
                 e.printStackTrace();
             }
             init();
         } else {
-            Log.e(TAG, "subscribeAction No connected scanner")
+            Log.e(TAG, "subscribeAction No connected scanner");
             callbackContext.error("No connected scanner");
         }
     }
