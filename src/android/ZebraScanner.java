@@ -366,6 +366,7 @@ public class ZebraScanner extends CordovaPlugin {
         }
 
         subscriptionCallback = null;
+        boolean success = false;
         try {
             rfidReader.Events.removeEventsListener(notificationReceiver);
             success = true;
@@ -373,6 +374,12 @@ public class ZebraScanner extends CordovaPlugin {
             success = false;
         } catch (OperationFailureException e) {
             success = false;
+        }
+        if (rfidReader.Events.isHandheldEventSet()) {
+            rfidReader.Events.setHandheldEvent(false);
+        }
+        if (rfidReader.Events.isBatterySet()) {
+            rfidReader.Events.setBatteryEvent(false);
         }
         callbackContext.success("ok");
     }
