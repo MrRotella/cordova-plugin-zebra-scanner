@@ -113,7 +113,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
         String epc;
         // JSONObject tagInfo = null;
         // int rssi;
-        try {
+        // try {
             // if (useASCII) {
                 epc = hexToAscii(tag.getTagID());
 
@@ -138,7 +138,8 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
                 data.put(epc);
             }
 
-        } /* catch (JSONException ex) {
+        // } 
+        /* catch (JSONException ex) {
             Log.e(TAG, "Error: " + ex.getMessage());
             // callbackContext.error("Error: " + ex.getMessage());
         } */
