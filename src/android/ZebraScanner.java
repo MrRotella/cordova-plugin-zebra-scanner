@@ -672,6 +672,6 @@ public class ZebraScanner extends CordovaPlugin {
     }
 
     public ReaderDevice getReaderDevice(){
-        return this.readerDevice
+        return this.readerDevice;
     }
 }
