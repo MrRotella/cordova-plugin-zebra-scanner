@@ -670,4 +670,8 @@ public class ZebraScanner extends CordovaPlugin {
         image.compress(format, quality, byteArrayStream);
         return Base64.encodeToString(byteArrayStream.toByteArray(), Base64.DEFAULT);
     }
+
+    public ReaderDevice getReaderDevice(){
+        return this.readerDevice
+    }
 }

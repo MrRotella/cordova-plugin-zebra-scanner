@@ -16,9 +16,69 @@ import org.json.JSONException;
 public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListener {
     private static final String TAG = "CL_ZebraScanner";
     private ZebraScanner mScanner;
+    ReaderDevice readerDevice;
 
     NotificationReceiver(ZebraScanner scanner) {
         mScanner = scanner;
+        this.readerDevice = mScanner.getReaderDevice();
+    }
+
+    @Override
+    public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) {
+        try {
+            if (rfidStatusEvents != null) {
+
+                STATUS_EVENT_TYPE statusEventType = rfidStatusEvents.StatusEventData.getStatusEventType();
+                // if (statusEventType != null && statusEventType.toString().equalsIgnoreCase("BATTERY_EVENT")) {
+                //     getDeviceInfo(rfidStatusEvents);
+
+                // }
+                RfidReadEvents rfidReadEvents = new RfidReadEvents(readerDevice.getRFIDReader().Actions.Inventory);
+                HANDHELD_TRIGGER_EVENT_TYPE handheldEvent = rfidStatusEvents.StatusEventData.HandheldTriggerEventData.getHandheldEvent();
+                try {
+                    if (handheldEvent != null && handheldEvent.toString().equalsIgnoreCase("HANDHELD_TRIGGER_PRESSED")) {
+
+                        /*
+                         * after perform(), stop() has to be called to save tags in memory. then we
+                         * can read the tags from memory when eventReadNotify() is called after
+                         * stop()
+                         */
+                        readerDevice.getRFIDReader().Actions.Inventory.perform();
+
+                    }
+                    if (handheldEvent != null && handheldEvent.toString().equalsIgnoreCase("HANDHELD_TRIGGER_RELEASED")) {
+                        readerDevice.getRFIDReader().Actions.Inventory.stop();
+                    }
+                } catch (InvalidUsageException e) {
+                    e.printStackTrace();
+                } catch (OperationFailureException e) {
+                    e.printStackTrace();
+                }
+
+                if (rfidReadEvents != null) {
+                    Log.d(TAG, "rfidReadEvents!!!!");
+                    eventReadNotify(rfidReadEvents);
+                }
+
+            }
+
+        } catch (Exception ex) {
+            Log.e(TAG, "Error: " + ex.getMessage());
+        }
+
+    }
+
+    Override
+    public void eventReadNotify(RfidReadEvents rfidReadEvents) {
+        String epc;
+         if (readerDevice != null) {
+            TagData[] myTags = readerDevice.getRFIDReader().Actions.getReadTags(100);
+            for (TagData tag : myTags) {
+                epc = tag.getTagID();
+                Log.d(TAG, "eventReadNotify epc" + epc);
+                mScanner.notifyBarcodeReceived(epc, "rfid", 1);
+            }
+         }
     }
 
     @Override
