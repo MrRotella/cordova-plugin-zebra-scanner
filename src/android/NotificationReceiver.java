@@ -27,7 +27,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     }
 
     @Override
-    public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) {
+    public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) throws JSONException {
         Log.d(TAG, "NotificationReceiver eventStatusNotify!!!!");
         try {
             if (rfidStatusEvents != null) {
@@ -75,7 +75,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     }
 
     @Override
-    public void eventReadNotify(RfidReadEvents rfidReadEvents) {
+    public void eventReadNotify(RfidReadEvents rfidReadEvents) throws JSONException {
         Log.d(TAG, "NotificationReceiver eventReadNotify!!!!");
         String epc;
         if (readerDevice != null) {

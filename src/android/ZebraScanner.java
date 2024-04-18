@@ -362,7 +362,7 @@ public class ZebraScanner extends CordovaPlugin {
         // }
     }
 
-    private void subscribeAction(CallbackContext callbackContext) throws JSONException {
+    private void subscribeAction(CallbackContext callbackContext) {
         if (connectionCallBack == null) {
             callbackContext.error("No connected scanner");
             return;
