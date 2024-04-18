@@ -140,11 +140,11 @@ public class ZebraScanner extends CordovaPlugin {
      */
     private void setSdk(SDKHandler sdk) {
         sdkHandler = sdk;
-        init();
+        // init();
     }
     private void init() {
         Log.d(TAG, "Setting up Zebra SDK.");
-        notificationReceiver = new NotificationReceiver(this);
+        // notificationReceiver = new NotificationReceiver(this);
 
         // Subscribe to barcode events
         int notifications_mask = DCSSDKDefs.DCSSDK_EVENT.DCSSDK_EVENT_BARCODE.value
@@ -156,7 +156,7 @@ public class ZebraScanner extends CordovaPlugin {
                 | DCSSDKDefs.DCSSDK_EVENT.DCSSDK_EVENT_SESSION_TERMINATION.value;
 
         sdkHandler.dcssdkSubsribeForEvents(notifications_mask);
-        sdkHandler.dcssdkSetDelegate(notificationReceiver);
+        // sdkHandler.dcssdkSetDelegate(notificationReceiver);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_SNAPI);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
     }
@@ -350,12 +350,28 @@ public class ZebraScanner extends CordovaPlugin {
         }
 
         subscriptionCallback = callbackContext;
-        try {
-            rfidReader.Events.addEventsListener(notificationReceiver);
-        } catch (InvalidUsageException e) {
-            e.printStackTrace();
-        } catch (OperationFailureException e) {
-            e.printStackTrace();
+        if (readerDevice != null) {
+            if (!rfidReader.Events.isHandheldEventSet()) {
+                rfidReader.Events.setHandheldEvent(true);
+            }
+            if (!rfidReader.Events.isBatchModeEventSet()) {
+                rfidReader.Events.setBatchModeEvent(true);
+            }
+            notificationReceiver = new NotificationReceiver(this,readerDevice);
+            try {
+                rfidReader.Events.addEventsListener(notificationReceiver);
+                Log.d(TAG, "subscribeAction addEventsListener OK")
+            } catch (InvalidUsageException e) {
+                Log.e(TAG, "subscribeAction addEventsListener InvalidUsageException")
+                e.printStackTrace();
+            } catch (OperationFailureException e) {
+                Log.e(TAG, "subscribeAction addEventsListener OperationFailureException")
+                e.printStackTrace();
+            }
+            init();
+        } else {
+            Log.e(TAG, "subscribeAction No connected scanner")
+            callbackContext.error("No connected scanner");
         }
     }
 
@@ -671,7 +687,7 @@ public class ZebraScanner extends CordovaPlugin {
         return Base64.encodeToString(byteArrayStream.toByteArray(), Base64.DEFAULT);
     }
 
-    public ReaderDevice getReaderDevice(){
-        return this.readerDevice;
-    }
+    // public ReaderDevice getReaderDevice(){
+    //     return this.readerDevice;
+    // }
 }

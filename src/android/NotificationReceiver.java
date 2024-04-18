@@ -18,9 +18,9 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     private ZebraScanner mScanner;
     ReaderDevice readerDevice;
 
-    NotificationReceiver(ZebraScanner scanner) {
+    NotificationReceiver(ZebraScanner scanner, ReaderDevice readerDevice) {
         mScanner = scanner;
-        this.readerDevice = mScanner.getReaderDevice();
+        this.readerDevice = readerDevice;
     }
 
     @Override
@@ -50,8 +50,10 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
                         readerDevice.getRFIDReader().Actions.Inventory.stop();
                     }
                 } catch (InvalidUsageException e) {
+                    Log.e(TAG, "Error: InvalidUsageException");
                     e.printStackTrace();
                 } catch (OperationFailureException e) {
+                    Log.e(TAG, "Error: OperationFailureException");
                     e.printStackTrace();
                 }
 
