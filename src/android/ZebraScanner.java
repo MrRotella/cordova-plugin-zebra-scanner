@@ -376,7 +376,7 @@ public class ZebraScanner extends CordovaPlugin {
             if (!rfidReader.Events.isBatchModeEventSet()) {
                 rfidReader.Events.setBatchModeEvent(true);
             }
-            notificationReceiver = new NotificationReceiver(this,readerDevice);
+            notificationReceiver = new NotificationReceiver(this,readerDevice, connectedDeviceId);
             try {
                 rfidReader.Events.addEventsListener(notificationReceiver);
                 Log.d(TAG, "subscribeAction addEventsListener OK");
@@ -603,6 +603,23 @@ public class ZebraScanner extends CordovaPlugin {
     }
 
     public void notifyBarcodeReceived(String barcodeData, String barcodeType, int fromScannerId) throws JSONException {
+        if (subscriptionCallback == null)
+            return;
+
+        JSONObject data = new JSONObject();
+        data.put("deviceId", fromScannerId);
+
+        JSONObject barcode = new JSONObject();
+        barcode.put("type", barcodeType);
+        barcode.put("data", barcodeData);
+        data.put("barcode", barcode);
+
+        PluginResult message = new PluginResult(PluginResult.Status.OK, data);
+        message.setKeepCallback(true);
+        subscriptionCallback.sendPluginResult(message);
+    }
+
+    public void notifyBarcodeReceived(String[] barcodeData, String barcodeType, int fromScannerId) throws JSONException {
         if (subscriptionCallback == null)
             return;
 

@@ -12,15 +12,18 @@ import com.zebra.rfid.api3.*;
 import land.cookie.cordova.plugin.zebrascanner.barcode.BarcodeTypes;
 
 import org.json.JSONException;
+import org.json.JSONArray;
 
 public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListener {
     private static final String TAG = "CL_ZebraScanner";
     private ZebraScanner mScanner;
     ReaderDevice readerDevice;
+    int connectedDeviceId;
 
-    NotificationReceiver(ZebraScanner scanner, ReaderDevice readerDevice) {
+    NotificationReceiver(ZebraScanner scanner, ReaderDevice readerDevice, int connectedDeviceId) {
         mScanner = scanner;
         this.readerDevice = readerDevice;
+        this.connectedDeviceId = connectedDeviceId;
     }
 
     @Override
@@ -75,20 +78,80 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     public void eventReadNotify(RfidReadEvents rfidReadEvents) {
         Log.d(TAG, "NotificationReceiver eventReadNotify!!!!");
         String epc;
-         if (readerDevice != null) {
-            TagData[] myTags = readerDevice.getRFIDReader().Actions.getReadTags(100);
-            for (TagData tag : myTags) {
-                epc = tag.getTagID();
-                Log.d(TAG, "eventReadNotify epc" + epc);
+        if (readerDevice != null) {
+            try{
+                if (myTags != null) {
+                    JSONArray data = new JSONArray();
+                    TagData[] myTags = readerDevice.getRFIDReader().Actions.getReadTags(100);
+                    for (TagData tag : myTags) {
+                        putTagID(data, tag);
+                        // epc = tag.getTagID();
+                        // Log.d(TAG, "eventReadNotify epc" + epc);
+
+                    }
+                    mScanner.notifyBarcodeReceived(data, "rfid" , connectedDeviceId); 
+                    // try { 
+                    //     mScanner.notifyBarcodeReceived(epc, "rfid", 1); 
+                    // } catch(JSONException err) {
+                    //     Log.e(TAG, "ERROR notifying barcode.");
+                    // }
+                }
+            } catch (JSONException ex) {
+                Log.e(TAG, "Error: " + ex.getMessage());
             }
-            // try { 
-            //     mScanner.notifyBarcodeReceived(epc, "rfid", 1); 
-            // } catch(JSONException err) {
-            //     Log.e(TAG, "ERROR notifying barcode.");
-            // }
          } else {
             Log.e(TAG, "ERROR missing readerDevice.");
          }
+    }
+
+    /**
+     * @param data
+     * @param tag
+     */
+    private void putTagID(JSONArray data, TagData tag) {
+        Boolean isNew = true;
+        String epc;
+        // JSONObject tagInfo = null;
+        // int rssi;
+        try {
+            // if (useASCII) {
+                epc = hexToAscii(tag.getTagID());
+
+            // } else {
+            //     epc = tag.getTagID();
+            // }
+
+            for (int i = 0; i < data.length(); i++) {
+                // JSONObject availableData = data.getJSONObject(i);
+                // String availableID = (String) availableData.get(EPC);
+                String availableID = (String) data.getJSONObject(i);
+
+                if (epc.equalsIgnoreCase(availableID)) {
+                    isNew = false;
+                }
+
+            }
+
+            if (isNew) {
+                // rssi = tag.getPeakRSSI();
+                // tagInfo = JSONUtil.createRFIDJSONObject(epc, rssi);
+                data.put(epc);
+            }
+
+        } catch (JSONException ex) {
+            callbackContext.error("Error: " + ex.getMessage());
+        }
+    }
+
+    private String hexToAscii(String hexStr) {
+        StringBuilder output = new StringBuilder();
+
+        for (int i = 0; i < hexStr.length(); i += 2) {
+            String str = hexStr.substring(i, i + 2);
+            output.append((char) Integer.parseInt(str, 16));
+        }
+
+        return output.toString();
     }
 
     @Override
