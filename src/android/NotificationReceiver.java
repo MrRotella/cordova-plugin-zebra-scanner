@@ -25,6 +25,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
 
     @Override
     public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) {
+        Log.d(TAG, "NotificationReceiver eventStatusNotify!!!!");
         try {
             if (rfidStatusEvents != null) {
 
@@ -72,6 +73,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
 
     @Override
     public void eventReadNotify(RfidReadEvents rfidReadEvents) {
+        Log.d(TAG, "NotificationReceiver eventReadNotify!!!!");
         String epc;
          if (readerDevice != null) {
             TagData[] myTags = readerDevice.getRFIDReader().Actions.getReadTags(100);
