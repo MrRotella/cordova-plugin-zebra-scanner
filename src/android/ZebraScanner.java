@@ -246,7 +246,7 @@ public class ZebraScanner extends CordovaPlugin {
             return;
         } else {
             // Imposto l'id
-            connectedDeviceId = deviceId
+            connectedDeviceId = deviceId;
         }
 
         String deviceName = param.optString("deviceName");
