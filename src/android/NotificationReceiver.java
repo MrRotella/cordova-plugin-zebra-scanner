@@ -68,7 +68,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
 
     }
 
-    Override
+    @Override
     public void eventReadNotify(RfidReadEvents rfidReadEvents) {
         String epc;
          if (readerDevice != null) {
@@ -78,6 +78,8 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
                 Log.d(TAG, "eventReadNotify epc" + epc);
                 mScanner.notifyBarcodeReceived(epc, "rfid", 1);
             }
+         } else {
+            Log.e(TAG, "ERROR missing readerDevice.");
          }
     }
 
