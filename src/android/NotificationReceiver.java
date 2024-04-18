@@ -80,9 +80,9 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
         String epc;
         if (readerDevice != null) {
             try{
+                TagData[] myTags = readerDevice.getRFIDReader().Actions.getReadTags(100);
                 if (myTags != null) {
                     JSONArray data = new JSONArray();
-                    TagData[] myTags = readerDevice.getRFIDReader().Actions.getReadTags(100);
                     for (TagData tag : myTags) {
                         putTagID(data, tag);
                         // epc = tag.getTagID();
