@@ -140,9 +140,15 @@ public class ZebraScanner extends CordovaPlugin {
      */
     private void setSdk(SDKHandler sdk) {
         sdkHandler = sdk;
-        // init();
+        init();
     }
     private void init() {
+        Log.d(TAG, "Setting up Zebra SDK.");
+        sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_SNAPI);
+        sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
+    }
+
+    private void initSdkEvents() {
         Log.d(TAG, "Setting up Zebra SDK.");
         // notificationReceiver = new NotificationReceiver(this);
 
@@ -157,8 +163,6 @@ public class ZebraScanner extends CordovaPlugin {
 
         sdkHandler.dcssdkSubsribeForEvents(notifications_mask);
         // sdkHandler.dcssdkSetDelegate(notificationReceiver);
-        sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_SNAPI);
-        sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
     }
 
     private void startScanAction(CallbackContext callbackContext) throws JSONException {
@@ -368,7 +372,7 @@ public class ZebraScanner extends CordovaPlugin {
                 Log.e(TAG, "subscribeAction addEventsListener OperationFailureException");
                 e.printStackTrace();
             }
-            init();
+            initSdkEvents();
         } else {
             Log.e(TAG, "subscribeAction No connected scanner");
             callbackContext.error("No connected scanner");
