@@ -139,7 +139,8 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
             }
 
         } catch (JSONException ex) {
-            callbackContext.error("Error: " + ex.getMessage());
+            Log.e(TAG, "Error: " + ex.getMessage());
+            // callbackContext.error("Error: " + ex.getMessage());
         }
     }
 
