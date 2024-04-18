@@ -73,6 +73,8 @@ public class ZebraScanner extends CordovaPlugin {
     private static ReaderDevice readerDevice;
     private static RFIDReader rfidReader;
 
+    private int connectedDeviceId;
+
     @Override
     public boolean execute (
             String action, final JSONArray args, final CallbackContext callbackContext
@@ -148,8 +150,9 @@ public class ZebraScanner extends CordovaPlugin {
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
     }
 
-    private void initSdkEvents(NotificationReceiver notificationReceiver) {
+    private void initSdkEvents(NotificationReceiver notificationReceiver, CallbackContext callbackContext) {
         Log.d(TAG, "Setting up Zebra SDK.");
+        sdkHandler.dcssdkSetDelegate(notificationReceiver);
         // notificationReceiver = new NotificationReceiver(this);
 
         // Subscribe to barcode events
@@ -162,7 +165,10 @@ public class ZebraScanner extends CordovaPlugin {
                 | DCSSDKDefs.DCSSDK_EVENT.DCSSDK_EVENT_SESSION_TERMINATION.value;
 
         sdkHandler.dcssdkSubsribeForEvents(notifications_mask);
-        sdkHandler.dcssdkSetDelegate(notificationReceiver);
+        DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkEstablishCommunicationSession(connectedDeviceId);
+        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_FAILURE) {
+            callbackContext.error("Unable to connect to a scanner.");
+        }
     }
 
     private void startScanAction(CallbackContext callbackContext) throws JSONException {
@@ -238,6 +244,9 @@ public class ZebraScanner extends CordovaPlugin {
         if (deviceId == 0) {
             callbackContext.error("Invalid parameter - deviceId");
             return;
+        } else {
+            // Imposto l'id
+            connectedDeviceId = deviceId
         }
 
         String deviceName = param.optString("deviceName");
@@ -316,6 +325,8 @@ public class ZebraScanner extends CordovaPlugin {
             callbackContext.error("Invalid parameter - deviceId");
             return;
         }
+        // rimuovo l'id di connession
+        connectedDeviceId = 0;
          try {
             if (rfidReader == null) {
                 callbackContext.error("DEVICE_IS_NOT_CONNECTED");
@@ -372,7 +383,7 @@ public class ZebraScanner extends CordovaPlugin {
                 Log.e(TAG, "subscribeAction addEventsListener OperationFailureException");
                 e.printStackTrace();
             }
-            initSdkEvents(notificationReceiver);
+            initSdkEvents(notificationReceiver,callbackContext);
         } else {
             Log.e(TAG, "subscribeAction No connected scanner");
             callbackContext.error("No connected scanner");
