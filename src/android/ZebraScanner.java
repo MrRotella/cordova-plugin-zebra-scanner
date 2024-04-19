@@ -104,6 +104,8 @@ public class ZebraScanner extends CordovaPlugin {
         //     enableAutomaticSessionAction(args, callbackContext);
         else if ("getBatteryStats".equals(action))
             getBatteryStatsAction(args, callbackContext);
+        else if ("isConnected".equals(action))
+            isConnectedAction(callbackContext);
         else
             return false;
 
@@ -399,7 +401,7 @@ public class ZebraScanner extends CordovaPlugin {
             callbackContext.error("No connected scanner");
             return;
         }
-        
+
         if (subscriptionCallback == null) {
             callbackContext.error("No active subscription");
             return;
@@ -473,6 +475,14 @@ public class ZebraScanner extends CordovaPlugin {
             in_xml += "</attrib_list></arg-xml></cmdArgs></inArgs>";
 
         new BatteryStatsAsyncTask(deviceId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GET, callbackContext).execute(new String[]{in_xml});
+    }
+
+    private void isConnectedAction(CallbackContext callbackContext){
+        if (connectionCallBack == null||readerDevice == null) {
+            callbackContext.error("DEVICE_IS_NOT_CONNECTED");
+            return;
+        }
+        callbackContext.success("ok");
     }
 
     /**

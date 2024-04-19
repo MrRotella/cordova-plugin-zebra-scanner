@@ -53,6 +53,7 @@ In theory, all versions compatible with SDK version 2.6.16.0 should work. [See Z
 * [zebraScanner.disconnect](#disconnect)
 * [zebraScanner.subscribe](#subscribe)
 * [zebraScanner.unsubscribe](#unsubscribe)
+* [zebraScanner.isConnected](#isConnected)
 
 ### startScan
 Starts scanning for bluetooth and USB connected devices. Scanning is expensive so call stopScan() as soon as
@@ -302,3 +303,16 @@ zebraScanner.unsubscribe(successCallback, errorCallback)
 
 ##### Errors
 * "No active subscription" -- subscribe() was not called
+
+### isConnected
+Check if one device is connected.
+
+```javascript
+zebraScanner.isConnected(successCallback, errorCallback)
+```
+
+##### Success
+"ok"
+
+##### Errors
+* "DEVICE_IS_NOT_CONNECTED" -- connect() was not called
