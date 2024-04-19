@@ -395,6 +395,11 @@ public class ZebraScanner extends CordovaPlugin {
     }
 
     private void unsubscribeAction(CallbackContext callbackContext) {
+        if (connectionCallBack == null) {
+            callbackContext.error("No connected scanner");
+            return;
+        }
+        
         if (subscriptionCallback == null) {
             callbackContext.error("No active subscription");
             return;

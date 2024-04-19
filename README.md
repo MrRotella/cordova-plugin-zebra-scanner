@@ -13,7 +13,7 @@ It uses the Zebra SDK version 2.6.16.0.
 * Only one Bluetooth scanner can be connected. The Zebra SDK does not support multiple Bluetooth connections.
 * Multiple USB scanners can be connected. 1 Bluetooth + multiple USB scanners are also supported.
 * The Zebra SDKHandler is automatically initialized when the plugin starts.
-
+* Also rfid is readed and returned as array
 
 ## Install
 `cordova plugin add https://github.com/MrRotella/cordova-plugin-zebra-scanner.git`
@@ -24,10 +24,10 @@ These bluetooth barcode scanners are supported (in `SSI BT Classic (Discoverable
 • CS4070
 • LI4278
 • DS6878
-• RFD8500
+• RFD8500 (tested)
 • DS3678
 • LI3678
-• DS8178 (tested)
+• DS8178 
 ```
 These USB barcode scanners should be supported as well. The Presentation Cradle should be in `Symbol Native API (SNAPI) with Imaging Interface` mode (see your barcode scanner manual).
 ```
@@ -37,7 +37,7 @@ These USB barcode scanners should be supported as well. The Presentation Cradle 
 • LS2208 (if it has the silver Symbol logo and manufactured after 31 December 2014, it should work)
 • DS6878 and Presentation Cradle
 • MP6210 (CSS + Scale) + EAS (Sensormatic)
-• DS8178 and Presentation Cradle (tested)
+• DS8178 and Presentation Cradle
 ```
 
 In theory, all versions compatible with SDK version 2.6.16.0 should work. [See Zebra Docs](https://techdocs.zebra.com/dcs/scanners/sdk-android/about/).
@@ -278,12 +278,12 @@ zebraScanner.subscribe(successCallback, errorCallback)
   "deviceId": <number>
   "barcode": {
     "type": <string>,
-    "data": <string>
+    "data": <string> / [<string>]
   }
 }
 ```
 * barcode
-  * type - Type of a barcode that was read; It could be for example 'QR Code', 'EAN 128', or 'Code 128'.
+  * type - Type of a barcode that was read; It could be for example 'QR Code', 'EAN 128', or 'Code 128' or 'rfid'.
   * data - Data that was read from a barcode.
 
 ##### Errors
