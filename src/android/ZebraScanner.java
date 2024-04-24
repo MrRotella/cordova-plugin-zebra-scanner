@@ -46,6 +46,7 @@ public class ZebraScanner extends CordovaPlugin {
     // SDK does not support multiple connected devices.
     private CallbackContext connectionCallBack;
     private CallbackContext subscriptionCallback;
+    private CallbackContext antennaInfoCallback;
     private CallbackContext callbackContext; // Callback context for permissions
 
     // Permissions found in example Scanner Control app (version 2.6.16.0)
@@ -750,6 +751,7 @@ public class ZebraScanner extends CordovaPlugin {
             return;
         }
         try {
+            antennaInfoCallback = callbackContext 
             JSONObject antennaInfo = new JSONObject();
             Antennas.AntennaRfConfig antennaRF = rfidReader.Config.Antennas.getAntennaRfConfig(1);
             int transmitPowerIndexRF = antennaRF.getTransmitPowerIndex();
@@ -760,7 +762,8 @@ public class ZebraScanner extends CordovaPlugin {
             antennaInfo.put("scanPower", transmitPowerIndexRF);
 
             PluginResult message = createStatusMessage("OK", "antennaInfo", antennaInfo, true);
-            connectionCallBack.sendPluginResult(message);
+            antennaInfoCallback.sendPluginResult(message);
+            antennaInfoCallback = null;
             // rfidReader.Events.setBatteryEvent(true);
         } catch (InvalidUsageException e) {
             callbackContext.error("Unable to get antenna info.");
