@@ -759,7 +759,7 @@ public class ZebraScanner extends CordovaPlugin {
                     transmitPowerLevelValues == null ? " " : transmitPowerLevelValues[transmitPowerLevelValues.length - 1]);
             antennaInfo.put("scanPower", transmitPowerIndexRF);
 
-            PluginResult message = createStatusMessage(PluginResult.status.OK, "antennaInfo", antennaInfo, true);
+            PluginResult message = createStatusMessage("OK", "antennaInfo", antennaInfo, true);
             connectionCallBack.sendPluginResult(message);
             // rfidReader.Events.setBatteryEvent(true);
         } catch (InvalidUsageException e) {
