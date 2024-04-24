@@ -751,7 +751,7 @@ public class ZebraScanner extends CordovaPlugin {
         }
         try {
             JSONObject antennaInfo = new JSONObject();
-            AntennaRfConfig antennaRF = rfidReader.Config.Antennas.getAntennaRfConfig(1);
+            Antennas.AntennaRfConfig antennaRF = rfidReader.Config.Antennas.getAntennaRfConfig(1);
             int transmitPowerIndexRF = antennaRF.getTransmitPowerIndex();
             int[] transmitPowerLevelValues = rfidReader.ReaderCapabilities.getTransmitPowerLevelValues();
             antennaInfo.put("antennaMin", transmitPowerLevelValues == null ? " " : transmitPowerLevelValues[0]);
