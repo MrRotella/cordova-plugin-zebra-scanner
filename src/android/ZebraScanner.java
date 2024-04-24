@@ -109,6 +109,8 @@ public class ZebraScanner extends CordovaPlugin {
             isConnectedAction(callbackContext);
         else if ("getAntennaInfo".equals(action))
             getAntennaInfoAction(callbackContext);
+        else if ("setAntennaPower".equals(action))
+            setAntennaPowerAction(args,callbackContext);
         else
             return false;
 
@@ -776,4 +778,44 @@ public class ZebraScanner extends CordovaPlugin {
             Log.d(TAG, "Get antenna info failed. "+ e.getResults().toString() + " : " + e.getStatusDescription()+ " : " + e.getVendorMessage());
         }
     }
+
+    private void setAntennaPowerAction(JSONArray params, CallbackContext callbackContext) {
+        if (connectionCallBack == null) {
+            callbackContext.error("No connected scanner");
+            return;
+        }
+        JSONObject param = params.optJSONObject(0);
+        if (param == null) {
+            callbackContext.error("Missing parameters");
+            return;
+        }
+        int scanPower = param.optInt("scanPower");
+        int[] transmitPowerLevelValues = rfidReader.ReaderCapabilities.getTransmitPowerLevelValues();
+        if (transmitPowerLevelValues[0] > scanPower || transmitPowerLevelValues[transmitPowerLevelValues.length - 1] < scanPower) {
+            callbackContext.error("Power is only allowed between " + transmitPowerLevelValues[0] + " - "
+                    + transmitPowerLevelValues[transmitPowerLevelValues.length - 1]);
+            return;
+        }
+        try {
+            antennaInfoCallback = callbackContext;
+            Antennas.AntennaRfConfig antennaRfConfig = rfidReader.Config.Antennas.getAntennaRfConfig(1);
+            int oldPower = antennaRfConfig.getTransmitPowerIndex();
+            antennaRfConfig.setrfModeTableIndex(antennaRfConfig.getrfModeTableIndex());
+            antennaRfConfig.setTari(antennaRfConfig.getTari());
+            antennaRfConfig.setTransmitPowerIndex(scanPower);
+            rfidReader.Config.Antennas.setAntennaRfConfig(1, antennaRfConfig);
+            rfidReader.Config.saveConfig();
+            PluginResult message = createStatusMessage("Scan power set from " + oldPower + " to " + scanPower, false);
+            antennaInfoCallback.sendPluginResult(message);
+            antennaInfoCallback = null;
+            // callbackContext.success("Scan power set from " + oldPower + " to " + scanPower);
+        } catch (OperationFailureException e) {
+            callbackContext.error("Unable to set antenna power.");
+            // callbackContext.error("Please check, if device bluetooth is ON." + e.getResults().toString() + " : " + e.getStatusDescription()
+                            // + " : " + e.getVendorMessage());
+            Log.d(TAG, "Set antenna power failed. "+ e.getResults().toString() + " : " + e.getStatusDescription()+ " : " + e.getVendorMessage());
+        } catch (Exception e) {
+            Log.d(TAG, "Set antenna power failed.");        
+            callbackContext.error("Error occured.");
+        }
 }

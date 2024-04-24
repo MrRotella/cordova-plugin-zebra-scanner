@@ -45,6 +45,9 @@ const zebraScanner = {
   getAntennaInfo(successCallback, errorCallback) {
     cordova.exec(successCallback, errorCallback, serviceName, arguments.callee.name, []);
   },
+  setAntennaPower(successCallback, errorCallback, params) {
+    cordova.exec(successCallback, errorCallback, serviceName, arguments.callee.name, [params]);
+  },
 }
 
 // Init Zebra SDK when Cordova is ready
