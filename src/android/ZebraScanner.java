@@ -818,4 +818,5 @@ public class ZebraScanner extends CordovaPlugin {
             Log.d(TAG, "Set antenna power failed.");        
             callbackContext.error("Error occured.");
         }
+    }
 }
