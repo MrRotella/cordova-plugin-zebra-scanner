@@ -106,6 +106,8 @@ public class ZebraScanner extends CordovaPlugin {
             getBatteryStatsAction(args, callbackContext);
         else if ("isConnected".equals(action))
             isConnectedAction(callbackContext);
+        else if ("getAntennaInfo".equals(action))
+            getAntennaInfoAction(callbackContext);
         else
             return false;
 
@@ -741,4 +743,35 @@ public class ZebraScanner extends CordovaPlugin {
     // public ReaderDevice getReaderDevice(){
     //     return this.readerDevice;
     // }
+
+    private void getAntennaInfoAction(CallbackContext callbackContext) throws JSONException {
+        if (connectionCallBack == null) {
+            callbackContext.error("No connected scanner");
+            return;
+        }
+        try {
+            JSONObject antennaInfo = new JSONObject();
+            antennaInfo.put("deviceId", deviceId);
+            AntennaRfConfig antennaRF = rfidReader.Config.Antennas.getAntennaRfConfig(1);
+            int transmitPowerIndexRF = antennaRF.getTransmitPowerIndex();
+            int[] transmitPowerLevelValues = rfidReader.ReaderCapabilities.getTransmitPowerLevelValues();
+            antennaInfo.put("antennaMin", transmitPowerLevelValues == null ? " " : transmitPowerLevelValues[0]);
+            antennaInfo.put("antennaMax",
+                    transmitPowerLevelValues == null ? " " : transmitPowerLevelValues[transmitPowerLevelValues.length - 1]);
+            antennaInfo.put("scanPower", transmitPowerIndexRF);
+
+            PluginResult message = createStatusMessage(PluginResult.status.OK, "antennaInfo", antennaInfo, true);
+            connectionCallBack.sendPluginResult(message);
+            // rfidReader.Events.setBatteryEvent(true);
+        } catch (InvalidUsageException e) {
+            callbackContext.error("Unable to get antenna info.");
+            // callbackContext.error("Please check, if device bluetooth is ON." + e.getInfo());
+            Log.d(TAG, "Get antenna info failed. "+ e.getInfo());
+        } catch (OperationFailureException e) {
+            callbackContext.error("Unable to get antenna info.");
+            // callbackContext.error("Please check, if device bluetooth is ON." + e.getResults().toString() + " : " + e.getStatusDescription()
+                            // + " : " + e.getVendorMessage());
+            Log.d(TAG, "Get antenna info failed. "+ e.getResults().toString() + " : " + e.getStatusDescription()+ " : " + e.getVendorMessage());
+        }
+    }
 }
