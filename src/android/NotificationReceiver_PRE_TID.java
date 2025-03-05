@@ -26,23 +26,6 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
         this.connectedDeviceId = connectedDeviceId;
     }
 
-    private void addOperation(RFIDReader rfidReader){
-        TagAccess tagAccess = new TagAccess();
-        TagAccess.Sequence sequence = tagAccess.new Sequence(tagAccess);
-        TagAccess.Sequence.Operation operation = sequence.new Operation();
-        operation.setAccessOperationCode(ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ);
-        operation.ReadAccessParams.setMemoryBank(MEMORY_BANK.MEMORY_BANK_TID);
-        try {
-
-        rfidReader.Actions.TagAccess.OperationSequence.add(operation);
-
-        } catch (InvalidUsageException e) {
-            e.printStackTrace();
-        } catch (OperationFailureException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void eventStatusNotify(RfidStatusEvents rfidStatusEvents) {
         Log.d(TAG, "NotificationReceiver eventStatusNotify!!!!");
@@ -64,10 +47,8 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
                          * can read the tags from memory when eventReadNotify() is called after
                          * stop()
                          */
-                        readerDevice.getRFIDReader().Config.setDPOState(DYNAMIC_POWER_OPTIMIZATION.DISABLE);
-                        addOperation(readerDevice.getRFIDReader());
-                        readerDevice.getRFIDReader().Actions.TagAccess.OperationSequence.performSequence();
-                        // readerDevice.getRFIDReader().Actions.Inventory.perform();
+                        readerDevice.getRFIDReader().Actions.Inventory.perform();
+
                     }
                     if (handheldEvent != null && handheldEvent.toString().equalsIgnoreCase("HANDHELD_TRIGGER_RELEASED")) {
                         readerDevice.getRFIDReader().Actions.Inventory.stop();
@@ -130,15 +111,6 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
     private void putTagID(JSONArray data, TagData tag) {
         Boolean isNew = true;
         String epc;
-        String tid;
-        MEMORY_BANK bank = tag.getMemoryBank();
-        if(tag.getMemoryBankData()!=null) {
-          tid = tag.getMemoryBankData();
-        } else {
-          tid = "";
-        }
-        Log.d(TAG, "TID read FROM " + bank);
-        Log.d(TAG, "tid " + tid);
         // JSONObject tagInfo = null;
         // int rssi;
         // try {
@@ -154,8 +126,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
                 // String availableID = (String) availableData.get(EPC);
                 String availableID = (String) data.optString(i);
 
-                // if (epc.equalsIgnoreCase(availableID)) {
-                if (tid.equalsIgnoreCase(availableID)) {
+                if (epc.equalsIgnoreCase(availableID)) {
                     isNew = false;
                 }
 
@@ -164,8 +135,7 @@ public class NotificationReceiver implements IDcsSdkApiDelegate, RfidEventsListe
             if (isNew) {
                 // rssi = tag.getPeakRSSI();
                 // tagInfo = JSONUtil.createRFIDJSONObject(epc, rssi);
-                // data.put(epc);
-                data.put(tid);
+                data.put(epc);
             }
 
         // } 

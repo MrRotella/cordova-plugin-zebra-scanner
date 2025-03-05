@@ -285,7 +285,7 @@ zebraScanner.subscribe(successCallback, errorCallback)
 ```
 * barcode
   * type - Type of a barcode that was read; It could be for example 'QR Code', 'EAN 128', or 'Code 128' or 'rfid'.
-  * data - Data that was read from a barcode.
+  * data - Data that was read from a barcode (if RFID return TID).
 
 ##### Errors
 * "No connected scanner" -- No device is connected
