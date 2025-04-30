@@ -35,10 +35,19 @@ import com.zebra.rfid.api3.*;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+
 import static com.zebra.scannercontrol.RMDAttributes.*;
 
 public class ZebraScanner extends CordovaPlugin {
     private static final String TAG = "CL_ZebraScanner";
+
+    private final int REQUEST_BT_ENABLE = 59627; /*Random integer*/
 
     private SDKHandler sdkHandler; // Zebra SDK
     private NotificationReceiver notificationReceiver;
@@ -100,7 +109,8 @@ public class ZebraScanner extends CordovaPlugin {
         else if ("unsubscribe".equals(action))
             unsubscribeAction(callbackContext);
         else if ("init".equals(action))
-            initSdk();
+            // initSdk();
+            checkBluetoothBeforeInit();
         // else if ("enableAutomaticSession".equals(action))
         //     enableAutomaticSessionAction(args, callbackContext);
         else if ("getBatteryStats".equals(action))
@@ -117,6 +127,49 @@ public class ZebraScanner extends CordovaPlugin {
         this.callbackContext = callbackContext; // Used for permissions
         return true;
     }
+    /**
+     * check bluetooth adapter
+     */
+    private void checkBluetoothBeforeInit() {
+        Log.d(TAG, "checkBluetooth");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        // Bluetooth enable deprecated
+        BluetoothManager bluetoothManager = this.cordova.getActivity().getSystemService(BluetoothManager.class);
+        BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
+        if (bluetoothAdapter == null) {
+            // Device doesn't support Bluetooth
+            Log.d(TAG, "Device Not support bluetooth");
+        } else {
+            // Controllo attivazione
+            if (bluetoothAdapter.isEnabled()) {
+            Log.d(TAG, "bluetooth is Enabled, init SDK");
+            initSdk();
+            } else {
+            //Request Bluetooth to be enabled
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            this.cordova.startActivityForResult(this, enableBtIntent, REQUEST_BT_ENABLE);
+            this.cordova.getActivity().registerReceiver(btStateBroadReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+            }
+        }
+        } else {
+        initSdk();
+        }
+    }
+    private BroadcastReceiver btStateBroadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+            Log.d(TAG, "bluetooth ACTION_STATE_CHANGED");
+            switch (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
+            case BluetoothAdapter.STATE_ON:
+                // Can init SDK
+                initSdk();
+                cordova.getActivity().unregisterReceiver(btStateBroadReceiver);
+                break;
+            }
+        }
+        }
+    };
     /**
      * Init SDK & check/request permissions
      */
